@@ -67,7 +67,7 @@ void l2_prefetcher_operate(int cpu_num, unsigned long long int addr, unsigned lo
   // get tracker index to fill or replace
   int tracker_index = -1;
   for (int i=0; i<IP_COUNTER; i++) {
-    if (trackers[i].ip = ip) {
+    if (trackers[i].ip == ip) {
       tracker_index = i;
       break;
     }
@@ -83,7 +83,7 @@ void l2_prefetcher_operate(int cpu_num, unsigned long long int addr, unsigned lo
       }
     }
     tracker_index = lru_index;
-    trackers[tracker_index].ip = ip
+    trackers[tracker_index].ip = ip;
   }
   // end of get tracker index to fill or replace
 
@@ -125,8 +125,10 @@ void l2_prefetcher_operate(int cpu_num, unsigned long long int addr, unsigned lo
       if (running_stride1 == stride1 && running_stride2 == stride2) {
         current = ghb[current.previous];
         int prefetched = 0;
+        unsigned long long int fetch_addr = addr;
         while (current.previous != -1 && prefetched < PREFETCH_DEGREE) {
-          l2_prefetch_line();
+          fetch_addr += ghb[current.previous].addr - current.addr;
+          l2_prefetch_line(0, addr, fetch_addr, FILL_L2);
           current = ghb[current.previous];
           prefetched++;
         }
